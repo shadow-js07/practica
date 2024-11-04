@@ -1,0 +1,26 @@
+Vagrant.configure("2") do |config|
+  # Selecciona la caja de Ubuntu 22.04
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.hostname = "servidorWeb"
+
+  # Configuración de hardware
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "1024" # 1 GB de RAM (puedes ajustar a 2 GB para mayor fluidez)
+    vb.cpus = 1        # 1 CPU (ajusta a 2 si tienes recursos disponibles)
+  end
+
+  # Configuración de red (puerto 80 para el servidor Apache)
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Sincronización de carpetas (compartir carpeta)
+  config.vm.synced_folder "src", "/vagrant"
+
+  # Script para instalar Apache y luego copiar el archivo HTML
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo apt-get update
+    sudo apt-get install -y apache2
+    sudo systemctl enable apache2
+    sudo systemctl start apache2
+    sudo cp /vagrant/index.html /var/www/html/index.html
+  SHELL
+end
